@@ -1,0 +1,36 @@
+# Python generated files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and local environment files
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+*.tar.gz
+*.zip
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# Editor and local tool state
+.idea/
+.vscode/
+.codex/
+.agents/
