@@ -12,7 +12,7 @@ Shrink code deliberately: preserve behavior first, reduce surface area second, a
 1. Establish the behavior contract before editing.
    - Read relevant tests, callers, public APIs, docs, and runtime entry points.
    - Identify behavior that must not change, including edge cases and error handling.
-   - If the user names target files, directories, or globs, treat them as the approved edit scope and read [file-scope.md](references/file-scope.md).
+   - If the user names target files, directories, or globs, treat them as the approved edit scope; read [file-scope.md](references/file-scope.md) and use `scripts/file_scope_guard.py` when available.
    - If isolation is useful or requested, read [worktree-isolation.md](references/worktree-isolation.md) before editing.
 2. Map the code shape.
    - Find duplicate branches, unused paths, overly broad abstractions, large functions, large files, and dependency boundaries.
@@ -25,6 +25,7 @@ Shrink code deliberately: preserve behavior first, reduce surface area second, a
 4. Edit in narrow, reviewable steps.
    - Keep unrelated formatting churn out of behavior-preserving refactors.
    - Do not combine cleanup with feature changes unless the user explicitly asks.
+   - Recheck the diff after each logical cleanup and stop if the change only moves complexity around.
 5. Validate with evidence.
    - Run existing targeted tests first, then broader checks based on blast radius.
    - If tests are missing, add focused characterization tests when feasible.

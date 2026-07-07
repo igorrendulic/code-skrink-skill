@@ -4,6 +4,16 @@ Split files only when doing so makes the code easier to understand, navigate, te
 
 Each resulting file should have one clear responsibility, cohesive internals, and a stable reason to exist.
 
+For code-shrink work, a split should reduce practical complexity: smaller review units, narrower dependency reach, clearer tests, or less code in the original hot path. Moving the same complexity into more files is not a successful shrink.
+
+## Before Splitting
+
+- Pin the behavior contract: public exports, side effects, error text, serialized data, route behavior, CLI flags, and config keys.
+- Identify the shrink target: smaller entry point, isolated pure logic, narrower imports, easier tests, or removed duplication after extraction.
+- Check existing callers and tests so the new module boundary follows current use, not imagined reuse.
+- Decide which file owns the public API after the split.
+- Stop if the only expected benefit is a lower line count.
+
 ## Split When
 
 - The file contains multiple responsibilities or ownership boundaries.
@@ -23,18 +33,22 @@ Each resulting file should have one clear responsibility, cohesive internals, an
 - The split only moves code without improving dependency direction, testability, navigation, or reviewability.
 - The result would be many tiny files that are harder to understand than the original file.
 - The split depends on imagined future reuse rather than current structure.
+- The original file is still the easiest place to understand ordering, transactions, locks, retries, or cleanup behavior.
+- Most names would need to become exported only so the split can compile.
 
 ## Practical Pattern
 
 1. Identify stable seams from existing callers, tests, imports, and responsibilities.
 2. Extract pure domain logic before framework-bound glue.
-3. Keep helpers local when they are used by only one module.
-4. Keep entry points and public exports stable.
-5. Preserve behavior, error semantics, serialized formats, route contracts, CLI flags, and config keys.
-6. Avoid adding new abstraction layers only to make the split possible.
-7. Add barrel exports only if the project already uses them.
-8. Update tests and imports mechanically after the split.
-9. Run the smallest relevant validation after each logical split.
+3. Move private types or helper functions with the logic that owns them.
+4. Keep helpers local when they are used by only one module.
+5. Keep entry points and public exports stable, even if they delegate internally.
+6. Preserve behavior, error semantics, serialized formats, route contracts, CLI flags, and config keys.
+7. Avoid adding new abstraction layers only to make the split possible.
+8. Add barrel exports only if the project already uses them.
+9. Update tests and imports mechanically after the split.
+10. Run the smallest relevant validation after each logical split.
+11. Recheck the diff for net clarity: fewer responsibilities per file, simpler imports, or easier tests.
 
 ## Natural Extraction Targets
 
@@ -60,3 +74,35 @@ application / orchestration
 domain logic / pure helpers
         ↓
 types / contracts
+```
+
+Avoid this direction:
+
+```text
+domain logic / pure helpers
+        ↓
+entrypoint / UI / route / framework
+```
+
+If a proposed split creates this direction, extract a smaller pure module or keep the code together.
+
+## Public API Control
+
+- Preserve existing imports for external callers when possible.
+- Keep newly extracted functions private unless another module already needs them.
+- Prefer one owner for re-exporting public names.
+- Do not export internal helpers only to test them; test through the behavior when practical.
+- When direct tests are useful, extract a cohesive pure module with a meaningful public contract.
+
+## State And Ordering
+
+Be cautious when splitting code that depends on shared mutable state, lifecycle order, transactions, retries, caching, cleanup, subscriptions, or locks.
+
+Before moving that code, write down:
+
+- Which state is read and written.
+- Which operations must happen before or after others.
+- Which errors are intentionally swallowed, wrapped, retried, or propagated.
+- Which cleanup steps must run on success, failure, and cancellation.
+
+If the split makes these rules harder to see, keep the code together or extract a smaller pure calculation instead.
