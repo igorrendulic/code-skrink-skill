@@ -2,6 +2,8 @@
 
 Use this when isolated cleanup work is requested or useful. Isolation is optional for single-agent work, but it protects the current checkout and can preserve dependency caches.
 
+Before creating a new worktree, check the current checkout for uncommitted work. Do not move or discard existing changes unless the user explicitly asks.
+
 ## Order Of Preference
 
 1. If already in an isolated worktree, use it.
@@ -42,11 +44,16 @@ Treehouse is useful when repeated sessions should reuse dependency installs and 
 Use this when Treehouse is not available or not appropriate:
 
 ```bash
-git check-ignore -q .worktrees
 git worktree add ".worktrees/<branch-name>" -b "<branch-name>"
 ```
 
-Before creating a project-local worktree, ensure `.worktrees/` is ignored. If it is not ignored, ask before adding `.worktrees/` to `.gitignore`.
+Before creating a project-local worktree, ensure `.worktrees/` is ignored:
+
+```bash
+git check-ignore -q .worktrees
+```
+
+If that command fails, ask before adding `.worktrees/` to `.gitignore`, or create the worktree outside the repository when an approved writable path is available.
 
 ## In-Place Fallback
 
