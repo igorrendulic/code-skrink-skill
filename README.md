@@ -36,7 +36,7 @@ The skill is intentionally conservative. It prioritizes behavior contracts, publ
 - `references/helper-extraction.md`: when and how to extract helpers.
 - `references/file-splitting.md`: when a file split is worthwhile.
 - `references/validation.md`: how to choose baseline, targeted, and broader checks.
-- `references/worktree-isolation.md`: optional isolation guidance with Treehouse or git worktrees.
+- `references/worktree-isolation.md`: required git worktree isolation, handoff, and explicit merge guidance.
 - `scripts/file_scope_guard.py`: verifies that changed files stay inside an approved scope.
 - `install.sh`: installs this skill into a local Codex skills directory.
 
@@ -69,9 +69,11 @@ In git repositories, `check` uses git status. Outside git, use `snapshot` before
 
 ## Worktree Isolation
 
-For repeated sessions, the skill can use Treehouse when installed to lease a reusable worktree pool entry. For one-off work, plain `git worktree` or in-place work is enough. Managed filesystem sandboxes may block Treehouse's default `~/.treehouse/` root unless that path is writable.
+In git repositories, the skill works from an isolated worktree before editing unless the user explicitly asks to work in place, the session is already isolated, or worktree creation is unavailable after following the fallback rules. It can use Treehouse when installed to lease a reusable worktree pool entry, or plain `git worktree` otherwise. Managed filesystem sandboxes may block Treehouse's default `~/.treehouse/` root unless that path is writable.
 
 Before creating a worktree, check for existing uncommitted work and avoid moving or discarding it unless the developer explicitly asks.
+
+The skill should not merge back into `main` or another target branch automatically. It reports the worktree path, branch, verification, and exact handoff commands; merging is only done when explicitly requested.
 
 ## Validation
 

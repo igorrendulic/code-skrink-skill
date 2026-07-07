@@ -13,7 +13,7 @@ Shrink code deliberately: preserve behavior first, reduce surface area second, a
    - Read relevant tests, callers, public APIs, docs, and runtime entry points.
    - Identify behavior that must not change, including edge cases and error handling.
    - If the user names target files, directories, or globs, treat them as the approved edit scope; read [file-scope.md](references/file-scope.md) and use `scripts/file_scope_guard.py` when available.
-   - If isolation is useful or requested, read [worktree-isolation.md](references/worktree-isolation.md) before editing.
+   - In git repositories, read [worktree-isolation.md](references/worktree-isolation.md) and work from an isolated worktree before editing unless the user explicitly asks to work in place, the session is already in an isolated worktree, or worktree creation is unavailable after following the fallback rules.
 2. Map the code shape.
    - Find duplicate branches, unused paths, overly broad abstractions, large functions, large files, and dependency boundaries.
    - Prefer local simplifications before introducing new abstractions.
