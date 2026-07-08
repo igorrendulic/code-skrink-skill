@@ -2,7 +2,7 @@
 
 Codex skill for reducing code size and complexity while preserving behavior.
 
-Use this repository as the source folder for installing the `code-shrink` skill into a Codex skills directory.
+Install this repository directly into a Codex skills directory, or use a local checkout while developing the skill.
 
 ## Goal
 
@@ -128,10 +128,16 @@ The final report should say what changed structurally, what behavior was preserv
 ## Install
 
 ```bash
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/igorrendulic/code-skrink-skill/main/install.sh | bash
 ```
 
 By default, the installer copies the skill to `${CODEX_HOME:-$HOME/.codex}/skills/code-shrink`.
+
+For a local checkout, run:
+
+```bash
+./install.sh
+```
 
 ## Development Notes
 
