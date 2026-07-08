@@ -19,25 +19,30 @@ When the user invokes this skill without a specific cleanup instruction, perform
 
 ## Workflow
 
-1. Establish the behavior contract before editing.
+1. Coordinate broad cleanup when task-graph is available.
+   - For repo-wide, package-wide, multi-file, or clearly parallelizable cleanup work, use the `task-graph` skill first if it is installed or available in the current session.
+   - Use `task-graph` to create or follow project-local task files, then apply this skill's behavior-preserving cleanup, scope, and validation rules inside each task.
+   - Skip `task-graph` for exact narrow edits such as one requested file, one named function, or one specific refactor.
+   - If `task-graph` is unavailable, continue with this workflow directly.
+2. Establish the behavior contract before editing.
    - Read relevant tests, callers, public APIs, docs, and runtime entry points.
    - Identify behavior that must not change, including edge cases and error handling.
    - If the user names target files, directories, or globs, treat them as the approved edit scope; read [file-scope.md](references/file-scope.md) and use `scripts/file_scope_guard.py` when available.
    - In git repositories, read [worktree-isolation.md](references/worktree-isolation.md) and work from an isolated worktree before editing unless the user explicitly asks to work in place, the session is already in an isolated worktree, or worktree creation is unavailable after following the fallback rules.
-2. Map the code shape.
+3. Map the code shape.
    - Find duplicate branches, unused paths, overly broad abstractions, large functions, large files, and dependency boundaries.
    - If local code implements commodity functionality that a maintained library may replace, read [library-replacement.md](references/library-replacement.md).
    - Prefer local simplifications before introducing new abstractions.
-3. Choose the smallest cleanup strategy that preserves behavior.
+4. Choose the smallest cleanup strategy that preserves behavior.
    - For general cleanup order and risk controls, read [cleanup-playbook.md](references/cleanup-playbook.md).
    - For repeated logic or long functions, read [helper-extraction.md](references/helper-extraction.md).
    - For files that are too large or mix responsibilities, read [file-splitting.md](references/file-splitting.md).
    - For verification strategy, read [validation.md](references/validation.md).
-4. Edit in narrow, reviewable steps.
+5. Edit in narrow, reviewable steps.
    - Keep unrelated formatting churn out of behavior-preserving refactors.
    - Do not combine cleanup with feature changes unless the user explicitly asks.
    - Recheck the diff after each logical cleanup and stop if the change only moves complexity around.
-5. Validate with evidence.
+6. Validate with evidence.
    - Run existing targeted tests first, then broader checks based on blast radius.
    - If tests are missing, add focused characterization tests when feasible.
    - Report any verification that could not be run.

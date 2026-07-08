@@ -60,6 +60,8 @@ The default behavior is:
 - File, directory, glob, module, or package named: perform the fullest high-confidence cleanup inside that scope.
 - Exact cleanup requested: do that cleanup instead of expanding into unrelated changes.
 
+For broad repo-wide, package-wide, multi-file, or parallelizable cleanup, the skill uses `task-graph` first when that skill is installed or available in the current session. Exact narrow edits skip `task-graph`; if it is unavailable, `code-shrink` continues with its normal workflow.
+
 High-confidence cleanup means the agent can justify the change from local evidence, such as proven dead code, obvious duplication, weak one-use abstractions, simpler conditionals, narrower data flow, reduced dependency reach, or a file split with a clear responsibility boundary. It does not mean speculative rewrites, behavior changes, or broad architecture redesign.
 
 ## Prompt Examples
