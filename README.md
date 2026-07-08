@@ -40,11 +40,35 @@ The skill is intentionally conservative. It prioritizes behavior contracts, publ
 - `scripts/file_scope_guard.py`: verifies that changed files stay inside an approved scope.
 - `install.sh`: installs this skill into a local Codex skills directory.
 
-## Usage Examples
+## How To Use
+
+You do not need to tell `code-shrink` exactly which refactor to perform. If you invoke the skill without a specific cleanup instruction, it should inspect the available code, find high-confidence cleanup opportunities, make the safe behavior-preserving changes, and validate them.
+
+Use a broad outcome-based prompt when you want the skill to decide what is worth doing:
+
+```text
+Use code-shrink.
+Use code-shrink on this repo.
+Use code-shrink on this package and do the full high-confidence cleanup.
+Use code-shrink on src/foo and decide what cleanup is worth doing.
+Use code-shrink only on src/foo.ts.
+```
+
+The default behavior is:
+
+- No specific scope: perform the fullest high-confidence cleanup across the repository or current working area.
+- File, directory, glob, module, or package named: perform the fullest high-confidence cleanup inside that scope.
+- Exact cleanup requested: do that cleanup instead of expanding into unrelated changes.
+
+High-confidence cleanup means the agent can justify the change from local evidence, such as proven dead code, obvious duplication, weak one-use abstractions, simpler conditionals, narrower data flow, reduced dependency reach, or a file split with a clear responsibility boundary. It does not mean speculative rewrites, behavior changes, or broad architecture redesign.
+
+## Prompt Examples
 
 Requests that should trigger this skill include:
 
 ```text
+Use code-shrink.
+Use code-shrink on src/foo.
 Shrink this module without changing behavior.
 Deduplicate the repeated validation logic in src/forms.
 Split this large file if it has clear responsibility boundaries.
@@ -52,7 +76,21 @@ Clean up only src/foo.ts and its tests.
 Remove dead code from this package and prove it is unused.
 ```
 
-For best results, name the target files, directories, or globs, and mention any behavior that must remain stable.
+For best results, name the target files, directories, or globs when you want a bounded cleanup. You only need to specify the exact cleanup when you already know what change you want.
+
+## Good Vs Over-Specified Prompts
+
+Prefer prompts that describe the desired outcome:
+
+```text
+Use code-shrink on src/forms and do the full high-confidence cleanup.
+```
+
+Use exact instructions only when the implementation choice matters:
+
+```text
+Use code-shrink on src/forms and only deduplicate the repeated validation logic.
+```
 
 ## Scoped Edits
 
