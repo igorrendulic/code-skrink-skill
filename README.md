@@ -44,6 +44,8 @@ The skill is intentionally conservative. It prioritizes behavior contracts, publ
 
 You do not need to tell `code-shrink` exactly which refactor to perform. If you invoke the skill without a specific cleanup instruction, it should inspect the available code, find high-confidence cleanup opportunities, make the safe behavior-preserving changes, and validate them.
 
+Every cleanup pass includes a file-splitting assessment. The skill should report whether it performed a split, rejected specific split candidates, or found no credible split boundaries. It should still split files only when current code provides a real responsibility boundary.
+
 Use a broad outcome-based prompt when you want the skill to decide what is worth doing:
 
 ```text
@@ -52,13 +54,14 @@ Use code-shrink on this repo.
 Use code-shrink on this package and do the full high-confidence cleanup.
 Use code-shrink on src/foo and decide what cleanup is worth doing.
 Use code-shrink only on src/foo.ts.
+Use code-shrink on clip.py and do the full cleanup, including any warranted file split.
 ```
 
 The default behavior is:
 
-- No specific scope: perform the fullest high-confidence cleanup across the repository or current working area.
-- File, directory, glob, module, or package named: perform the fullest high-confidence cleanup inside that scope.
-- Exact cleanup requested: do that cleanup instead of expanding into unrelated changes.
+- No specific scope: perform the fullest high-confidence cleanup across the repository or current working area, including file-splitting assessment.
+- File, directory, glob, module, or package named: perform the fullest high-confidence cleanup inside that scope, including file-splitting assessment.
+- Exact cleanup requested: do that cleanup instead of expanding into unrelated changes, but still assess and report file-splitting fit unless explicitly forbidden.
 
 For broad repo-wide, package-wide, multi-file, or parallelizable cleanup, the skill uses `task-graph` first when that skill is installed or available in the current session. Exact narrow edits skip `task-graph`; if it is unavailable, `code-shrink` continues with its normal workflow.
 
