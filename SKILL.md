@@ -7,6 +7,16 @@ description: Reduce code size and complexity while preserving behavior. Use when
 
 Shrink code deliberately: preserve behavior first, reduce surface area second, and keep changes easy to review, especially useful for large files, repeated logic, helper reuse/extraction, dead-code removal, and validation-focused refactors.
 
+## Default Behavior
+
+When the user invokes this skill without a specific cleanup instruction, perform the fullest high-confidence behavior-preserving cleanup that the current scope supports.
+
+- If the user gives no narrower scope, inspect the repository or current working area and clean up all high-confidence opportunities found.
+- If the user names files, directories, globs, modules, or packages, treat that as the approved scope and perform full high-confidence cleanup inside it.
+- If the user specifies an exact cleanup, follow that request instead of expanding into unrelated cleanup.
+- Treat cleanup as high-confidence only when local evidence supports it: proven dead code, obvious duplication, weak one-use abstractions, simpler conditionals, narrower data flow, reduced dependency reach, or a file split with a clear responsibility boundary.
+- Do not use "full cleanup" as permission for speculative rewrites, behavior changes, broad architecture redesign, or touching files outside an explicit scope.
+
 ## Workflow
 
 1. Establish the behavior contract before editing.
@@ -16,6 +26,7 @@ Shrink code deliberately: preserve behavior first, reduce surface area second, a
    - In git repositories, read [worktree-isolation.md](references/worktree-isolation.md) and work from an isolated worktree before editing unless the user explicitly asks to work in place, the session is already in an isolated worktree, or worktree creation is unavailable after following the fallback rules.
 2. Map the code shape.
    - Find duplicate branches, unused paths, overly broad abstractions, large functions, large files, and dependency boundaries.
+   - If local code implements commodity functionality that a maintained library may replace, read [library-replacement.md](references/library-replacement.md).
    - Prefer local simplifications before introducing new abstractions.
 3. Choose the smallest cleanup strategy that preserves behavior.
    - For general cleanup order and risk controls, read [cleanup-playbook.md](references/cleanup-playbook.md).
