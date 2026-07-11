@@ -39,4 +39,4 @@ Prefer a thin domain wrapper around an external library when the wrapper preserv
 - Add or update tests for compatibility edge cases, error paths, serialization, and public entry points.
 - Verify dependency manifest and lockfile changes are intentional.
 - Run targeted tests, type checks, build checks, and any runtime flow affected by the dependency.
-- Recheck the final diff for net shrink: less owned code, clearer call sites, smaller maintenance surface, or fewer custom edge cases.
+- Recheck the final diff for net clarity: less owned code, clearer call sites, smaller maintenance surface, or fewer custom edge cases.

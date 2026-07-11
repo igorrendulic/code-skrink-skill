@@ -1,8 +1,8 @@
 # Helper Extraction
 
-Extract helpers to make code smaller only when the new helper has a clear contract and reduces net complexity.
+Extract helpers when the new helper gives a real concept a name, creates a clear contract, and reduces net complexity.
 
-A successful extraction makes the caller shorter, the extracted logic easier to name or test, and the behavior contract easier to verify. Moving lines into another function without reducing branching, data flow, dependency reach, or review burden is not a successful shrink.
+A successful extraction makes the caller easier to read, the extracted logic easier to name or test, and the behavior contract easier to verify. Moving lines into another function without reducing branching, data flow, dependency reach, review burden, or cognitive load is not a successful cleanup.
 
 ## Good Extraction Candidates
 
@@ -10,6 +10,7 @@ A successful extraction makes the caller shorter, the extracted logic easier to 
 - Long functions with separable stages such as parse, validate, transform, persist, or render.
 - Logic that can be tested without I/O, framework state, or global mutation.
 - Domain rules that benefit from a meaningful name.
+- Dense expressions where a named intermediate concept is clearer than an inline chain.
 - Pure calculations currently mixed into I/O, framework glue, or orchestration code.
 - Repeated setup, normalization, or error mapping that already behaves as one concept.
 
@@ -19,6 +20,7 @@ A successful extraction makes the caller shorter, the extracted logic easier to 
 - Helpers whose parameters are mostly pass-through state from a large outer scope.
 - Generic utilities with vague names such as `handleData`, `processItem`, or `common`.
 - Helpers that hide important ordering, locking, transaction, or error semantics.
+- Helpers with Boolean flags or option bags that make call sites less readable than the original branches.
 - Helpers created only to satisfy imagined future reuse.
 - Helpers that must be exported only so tests or distant modules can reach them.
 - Helpers that increase call depth without reducing conditional complexity or data flow.
@@ -26,7 +28,7 @@ A successful extraction makes the caller shorter, the extracted logic easier to 
 ## Before Extracting
 
 - Search for an existing helper with the same contract before creating a new one.
-- Identify the shrink target: fewer repeated branches, shorter caller, narrower data shape, isolated pure logic, or simpler tests.
+- Identify the readability target: clearer caller intent, fewer repeated branches, shorter caller, narrower data shape, isolated pure logic, or simpler tests.
 - Check whether inlining an existing weak helper would shrink the code more than extracting another one.
 - Preserve public APIs, exported names, serialized shapes, error text, and framework-discovered entry points.
 - Stop if the extraction requires broadening visibility, weakening types, or changing behavior to make the helper fit.
@@ -39,11 +41,11 @@ A successful extraction makes the caller shorter, the extracted logic easier to 
 4. Keep the helper private and near its callers unless there is proven reuse across modules.
 5. Preserve names and behavior at call boundaries.
 6. Add or update targeted tests for the helper if it contains meaningful branching.
-7. Recheck the diff for net shrink: the caller should read simpler, duplication should drop, or validation should become easier.
+7. Recheck the diff for net clarity: the caller should read simpler, duplication should drop, or validation should become easier.
 
 ## Naming
 
-- Use domain-specific verbs and nouns.
+- Use domain-specific verbs and nouns that make the call site read naturally.
 - Avoid names that describe implementation mechanics only.
 - If no clear name exists, the block may not be ready to extract.
 

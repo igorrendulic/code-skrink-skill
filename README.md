@@ -1,26 +1,29 @@
 # code-shrink
 
-Codex skill for reducing code size and complexity while preserving behavior.
+Codex skill for making code easier to read while preserving behavior.
 
 Install this repository directly into a Codex skills directory, or use a local checkout while developing the skill.
 
 ## Goal
 
-`code-shrink` helps an agent make code smaller, clearer, and easier to review without changing user-visible behavior. It is meant for cleanup work such as:
+`code-shrink` helps an agent make code clearer, simpler, and easier to review without changing user-visible behavior. It is meant for cleanup work such as:
 
+- Improving unclear names and tangled control flow.
 - Removing proven dead code.
 - Deduplicating repeated logic.
 - Extracting focused helpers.
 - Splitting files by real responsibility boundaries.
 - Inlining weak abstractions.
 - Narrowing data shapes and dependency reach.
-- Adding or choosing validation that proves behavior stayed stable.
+- Adding or choosing validation that proves behavior stayed stable and readability improved.
 
-The skill is intentionally conservative. It prioritizes behavior contracts, public API stability, scoped edits, and targeted verification over aggressive rewrites.
+The skill is intentionally conservative. It prioritizes maintainer comprehension, behavior contracts, public API stability, scoped edits, and targeted verification over aggressive rewrites or line-count wins.
 
 ## What The Skill Optimizes For
 
 - Preserve existing behavior first.
+- Prefer code a future maintainer can understand faster.
+- Accept a few more lines when explicitness, naming, or structure improves comprehension.
 - Prefer deletion, inlining, and reuse before new abstractions.
 - Keep helpers close to their domain.
 - Avoid generic `utils`, `helpers`, or `common` dumping grounds.
@@ -31,10 +34,12 @@ The skill is intentionally conservative. It prioritizes behavior contracts, publ
 ## Repository Layout
 
 - `SKILL.md`: entry point loaded by Codex when the skill triggers.
+- `references/readability.md`: naming, explicitness, comments, idioms, DRY tradeoffs, and responsibility checks.
 - `references/cleanup-playbook.md`: ordered cleanup strategy and risk controls.
 - `references/file-scope.md`: explicit file-scope contract and guard usage.
 - `references/helper-extraction.md`: when and how to extract helpers.
 - `references/file-splitting.md`: when a file split is worthwhile.
+- `references/library-replacement.md`: when maintained libraries may reduce owned complexity.
 - `references/validation.md`: how to choose baseline, targeted, and broader checks.
 - `references/worktree-isolation.md`: required git worktree isolation, handoff, and explicit merge guidance.
 - `scripts/file_scope_guard.py`: verifies that changed files stay inside an approved scope.
@@ -42,7 +47,7 @@ The skill is intentionally conservative. It prioritizes behavior contracts, publ
 
 ## How To Use
 
-You do not need to tell `code-shrink` exactly which refactor to perform. If you invoke the skill without a specific cleanup instruction, it should inspect the available code, find high-confidence cleanup opportunities, make the safe behavior-preserving changes, and validate them.
+You do not need to tell `code-shrink` exactly which refactor to perform. If you invoke the skill without a specific cleanup instruction, it should inspect the available code, find high-confidence readability cleanup opportunities, make the safe behavior-preserving changes, and validate them.
 
 Every cleanup pass includes a file-splitting assessment. The skill should report whether it performed a split, rejected specific split candidates, or found no credible split boundaries. It should still split files only when current code provides a real responsibility boundary.
 
@@ -51,21 +56,21 @@ Use a broad outcome-based prompt when you want the skill to decide what is worth
 ```text
 Use code-shrink.
 Use code-shrink on this repo.
-Use code-shrink on this package and do the full high-confidence cleanup.
+Use code-shrink on this package and make it easier to read.
 Use code-shrink on src/foo and decide what cleanup is worth doing.
 Use code-shrink only on src/foo.ts.
-Use code-shrink on clip.py and do the full cleanup, including any warranted file split.
+Use code-shrink on clip.py and improve readability, including any warranted file split.
 ```
 
 The default behavior is:
 
-- No specific scope: perform the fullest high-confidence cleanup across the repository or current working area, including file-splitting assessment.
-- File, directory, glob, module, or package named: perform the fullest high-confidence cleanup inside that scope, including file-splitting assessment.
+- No specific scope: perform the fullest high-confidence readability cleanup across the repository or current working area, including file-splitting assessment.
+- File, directory, glob, module, or package named: perform the fullest high-confidence readability cleanup inside that scope, including file-splitting assessment.
 - Exact cleanup requested: do that cleanup instead of expanding into unrelated changes, but still assess and report file-splitting fit unless explicitly forbidden.
 
 For broad repo-wide, package-wide, multi-file, or parallelizable cleanup, the skill uses `task-graph` first when that skill is installed or available in the current session. Exact narrow edits skip `task-graph`; if it is unavailable, `code-shrink` continues with its normal workflow.
 
-High-confidence cleanup means the agent can justify the change from local evidence, such as proven dead code, obvious duplication, weak one-use abstractions, simpler conditionals, narrower data flow, reduced dependency reach, or a file split with a clear responsibility boundary. It does not mean speculative rewrites, behavior changes, or broad architecture redesign.
+High-confidence cleanup means the agent can justify the change from local evidence, such as clearer names, easier control flow, proven dead code, obvious duplication, weak one-use abstractions, narrower data flow, reduced dependency reach, or a file split with a clear responsibility boundary. It does not mean speculative rewrites, behavior changes, preference-only renames, or broad architecture redesign.
 
 ## Prompt Examples
 
@@ -75,6 +80,7 @@ Requests that should trigger this skill include:
 Use code-shrink.
 Use code-shrink on src/foo.
 Shrink this module without changing behavior.
+Make this module easier to read without changing behavior.
 Deduplicate the repeated validation logic in src/forms.
 Split this large file if it has clear responsibility boundaries.
 Clean up only src/foo.ts and its tests.
@@ -88,7 +94,7 @@ For best results, name the target files, directories, or globs when you want a b
 Prefer prompts that describe the desired outcome:
 
 ```text
-Use code-shrink on src/forms and do the full high-confidence cleanup.
+Use code-shrink on src/forms and make the code easier to read.
 ```
 
 Use exact instructions only when the implementation choice matters:
@@ -120,20 +126,21 @@ The skill should not merge back into `main` or another target branch automatical
 
 ## Validation
 
-Behavior-preserving cleanup is only complete when verification matches the risk. Typical evidence includes:
+Behavior-preserving cleanup is only complete when verification matches the risk and the result is easier to understand. Typical evidence includes:
 
 - Reference searches before deleting code.
 - Existing targeted tests for touched modules.
 - Characterization tests for important behavior with weak coverage.
 - Type checks or builds when imports, exports, or file boundaries change.
 - Before/after CLI output, generated artifacts, API responses, or UI screenshots when automated tests are not enough.
+- Final readability review for names, control flow, locality, responsibility boundaries, and reviewability.
 
-The final report should say what changed structurally, what behavior was preserved, which checks passed, and which checks could not be run.
+The final report should say what changed structurally, what readability improved, what behavior was preserved, which checks passed, and which checks could not be run.
 
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/igorrendulic/code-skrink-skill/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/igorrendulic/code-shrink-skill/main/install.sh | bash
 ```
 
 By default, the installer copies the skill to `${CODEX_HOME:-$HOME/.codex}/skills/code-shrink`.

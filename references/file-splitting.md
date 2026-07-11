@@ -4,7 +4,7 @@ Split files only when doing so makes the code easier to understand, navigate, te
 
 Each resulting file should have one clear responsibility, cohesive internals, and a stable reason to exist.
 
-For code-shrink work, a split should reduce practical complexity: smaller review units, narrower dependency reach, clearer tests, or less code in the original hot path. Moving the same complexity into more files is not a successful shrink.
+For code-shrink work, a split should reduce practical complexity: clearer locality, smaller review units, narrower dependency reach, clearer tests, or less code in the original hot path. Moving the same complexity into more files is not a successful cleanup.
 
 ## Architecture Heuristics
 
@@ -15,13 +15,14 @@ Use these checks to decide whether a split creates a better module boundary or o
 - Deletion test: deleting the new module should concentrate complexity back into the owner; if it only moves lines back, the module is probably shallow.
 - Real seam: the boundary should be supported by existing responsibilities, callers, tests, imports, dependency direction, or different reasons to change.
 - Shallow-module warning: avoid splits where the new file's public surface is nearly as complex as its implementation.
+- Naming: the new file should have a specific domain name. If the best name is `utils`, `helpers`, `common`, or `misc`, the boundary is not clear enough.
 
 Treat these as filters, not permission for broad architecture redesign. If a split needs new abstractions, renamed concepts, or changed behavior to look good, stop and keep the cleanup smaller.
 
 ## Before Splitting
 
 - Pin the behavior contract: public exports, side effects, error text, serialized data, route behavior, CLI flags, and config keys.
-- Identify the shrink target: smaller entry point, isolated pure logic, narrower imports, easier tests, or removed duplication after extraction.
+- Identify the readability target: clearer locality, smaller entry point, isolated pure logic, narrower imports, easier tests, or removed duplication after extraction.
 - Check existing callers and tests so the new module boundary follows current use, not imagined reuse.
 - Check whether the proposed boundary improves locality and depth; reject shallow modules that only move lines.
 - Decide which file owns the public API after the split.
@@ -37,6 +38,7 @@ Treat these as filters, not permission for broad architecture redesign. If a spl
 - A smaller module can have a stable public contract.
 - The extracted module makes one concept easier to understand locally.
 - A split reduces cognitive load without increasing dependency complexity.
+- The new file can be named after a responsibility that already exists in the code.
 
 ## Avoid Splitting When
 
@@ -44,7 +46,7 @@ Treat these as filters, not permission for broad architecture redesign. If a spl
 - The split would increase public API surface without reducing complexity.
 - The new files would be named after vague buckets such as `utils`, `helpers`, `common`, or `misc`.
 - Most functions need most of the same private state.
-- The split only moves code without improving dependency direction, testability, navigation, or reviewability.
+- The split only moves code without improving dependency direction, testability, navigation, locality, or reviewability.
 - The new module is shallow: its interface exposes nearly as much complexity as the implementation hides.
 - The result would be many tiny files that are harder to understand than the original file.
 - The split depends on imagined future reuse rather than current structure.

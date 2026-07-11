@@ -1,8 +1,8 @@
 # Validation
 
-Behavior-preserving cleanup is only complete when verification matches the risk.
+Behavior-preserving cleanup is only complete when verification matches the risk and the final code is genuinely easier to understand.
 
-Use this reference to choose evidence, not to run every possible check. The goal is to prove the visible contract stayed stable while the code became smaller, simpler, or easier to review.
+Use this reference to choose evidence, not to run every possible check. The goal is to prove the visible contract stayed stable while the code became clearer, smaller, simpler, or easier to review.
 
 ## Before Editing
 
@@ -27,6 +27,7 @@ Use this reference to choose evidence, not to run every possible check. The goal
 - Manually exercise UI or CLI flows when automated coverage is weak.
 - Compare generated outputs, snapshots, API responses, or serialized data when relevant.
 - Confirm the final diff actually shrinks or simplifies the target: less duplication, fewer branches, narrower data flow, smaller dependency reach, clearer file ownership, or lower review burden.
+- Confirm the final diff improves readability: clearer names, easier control flow, better locality, stronger responsibility boundaries, or more explicit intent.
 
 ## Match Checks To Cleanup Type
 
@@ -39,6 +40,19 @@ Use this reference to choose evidence, not to run every possible check. The goal
 | Dependency or data-shape narrowing | Tests for public APIs, serialization, config loading, plugin hooks, and external callers that might rely on the old shape. |
 | UI cleanup | Before/after screenshots or manual interaction notes for affected states, responsive breakpoints, loading/empty/error states, and accessibility-relevant controls. |
 | CLI/API cleanup | Before/after command output or response samples for success, validation failure, missing input, and error cases. |
+
+## Readability Review
+
+Before reporting completion, compare the before and after diff from a maintainer's point of view:
+
+- Is the normal path easier to follow?
+- Are names more specific, accurate, and consistent with neighboring code?
+- Are edge cases and error paths still visible and intentional?
+- Did any helper extraction or file split reduce what readers must hold in memory?
+- Did any added abstraction hide behavior that was clearer inline?
+- Did the cleanup avoid unrelated formatting churn and preference-only renames?
+
+If the answer is not clearly positive, revert or narrow the cleanup before claiming success.
 
 ## Characterization Tests
 
@@ -57,5 +71,6 @@ Include:
 
 - What changed structurally.
 - What behavior was preserved.
+- What readability improved.
 - Which baseline, targeted, and broad checks were run and whether they passed.
 - Any verification gaps, skipped tests, or remaining risk.
