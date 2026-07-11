@@ -112,7 +112,7 @@ In git repositories, `check` uses git status. Outside git, use `snapshot` before
 
 ## Worktree Isolation
 
-In git repositories, the skill works from an isolated worktree before editing unless the user explicitly asks to work in place, the session is already isolated, or worktree creation is unavailable after following the fallback rules. It can use Treehouse when installed to lease a reusable worktree pool entry, or plain `git worktree` otherwise. Managed filesystem sandboxes may block Treehouse's default `~/.treehouse/` root unless that path is writable.
+In git repositories, the skill works from an isolated worktree before editing unless the user explicitly asks to work in place, the session is already isolated, or worktree creation is unavailable after following the fallback rules. It can use Treehouse when installed to lease a reusable worktree pool entry, or plain `git worktree` otherwise. Plain git worktrees use an existing ignored `.worktrees/` or `.worktree/` directory at the repository root when available; otherwise they fall back outside the repository. Managed filesystem sandboxes may block Treehouse's default `~/.treehouse/` root unless that path is writable.
 
 Before creating a worktree, check for existing uncommitted work and avoid moving or discarding it unless the developer explicitly asks.
 

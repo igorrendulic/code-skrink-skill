@@ -11,7 +11,7 @@ Before creating a new worktree, check the current checkout for uncommitted work.
 3. If Treehouse is unavailable, use a plain git worktree.
 4. If git is unavailable, work in place and rely on file-scope checks.
 
-Use a branch named `code-shrink/<short-target>` unless the user provides a branch name. Use a filesystem-safe worktree path such as `.worktrees/code-shrink-<short-target>`.
+Use a branch named `code-shrink/<short-target>` unless the user provides a branch name. Use a filesystem-safe worktree path such as `<worktree-root>/code-shrink-<short-target>`.
 
 ## Detect Current State
 
@@ -43,19 +43,31 @@ Treehouse is useful when repeated sessions should reuse dependency installs and 
 
 ## Plain Git Worktree Fallback
 
-Use this when Treehouse is not available or not appropriate:
+Use this when Treehouse is not available or not appropriate.
+
+Before creating a worktree, resolve the repository root and choose the worktree root:
 
 ```bash
-git worktree add ".worktrees/code-shrink-<short-target>" -b "code-shrink/<short-target>"
+repo_root=$(git rev-parse --show-toplevel)
+worktree_root=
+
+for candidate in .worktrees .worktree; do
+  if [ -d "$repo_root/$candidate" ] && git -C "$repo_root" check-ignore -q "$candidate/"; then
+    worktree_root="$repo_root/$candidate"
+    break
+  fi
+done
+
+if [ -z "$worktree_root" ]; then
+  worktree_root=$(mktemp -d "${TMPDIR:-/tmp}/code-shrink-worktree.XXXXXX")
+fi
+
+git -C "$repo_root" worktree add "$worktree_root/code-shrink-<short-target>" -b "code-shrink/<short-target>"
 ```
 
-Before creating a project-local worktree, ensure `.worktrees/` is ignored:
+Check `$repo_root/.worktrees` first, then `$repo_root/.worktree`. Use the first directory that both exists and is ignored by git. If both directories exist and are ignored, prefer `.worktrees/`.
 
-```bash
-git check-ignore -q .worktrees
-```
-
-If that command fails, ask before adding `.worktrees/` to `.gitignore`, or create the worktree outside the repository when an approved writable path is available.
+If neither directory exists or the existing directory is not ignored, do not ask to modify `.gitignore`; create the worktree in a writable temp directory.
 
 ## In-Place Fallback
 
@@ -80,7 +92,7 @@ For a local merge handoff, adapt these commands to the target branch and worktre
 git switch main
 git pull --ff-only
 git merge --no-ff code-shrink/<short-target>
-git worktree remove .worktrees/code-shrink-<short-target>
+git worktree remove <worktree-root>/code-shrink-<short-target>
 git branch -d code-shrink/<short-target>
 ```
 
